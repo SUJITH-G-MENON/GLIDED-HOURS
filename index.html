@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gilded Hours — clocks made for you</title>
+<meta name="description" content="Enter your name and describe the clock you imagine. Gilded Hours draws it in purple and gold and sets it ticking.">
+<meta name="theme-color" content="#1a0933">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Ccircle cx='200' cy='200' r='190' fill='%23d9ac35'/%3E%3Ccircle cx='200' cy='200' r='160' fill='%233b1a78'/%3E%3Cpath d='M200 200V80M200 200l85 45' stroke='%23f6e7b4' stroke-width='18' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --night: #1a0933; --amethyst: #2d1259; --gold: #e8c156; --gold-soft: #f6e7b4; --mist: #c9b8e6;
+  --line: rgba(232, 193, 86, 0.32);
+  --display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--night); color: #f1e9ff; font-family: var(--body); font-size: 1.0625rem; line-height: 1.6; }
+a { color: var(--gold); }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+h1, h2 { font-family: var(--display); font-weight: 600; color: var(--gold-soft); margin: 0; }
+h1 { font-size: clamp(2.7rem, 6vw, 4.7rem); line-height: 1.02; letter-spacing: -0.01em; }
+h2 { font-size: clamp(1.9rem, 3.5vw, 2.6rem); line-height: 1.1; }
+
+.site-header, .site-footer, .hero, .section { width: min(1120px, 100% - 2.5rem); margin-inline: auto; }
+.site-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 0; }
+.brand { display: inline-flex; align-items: center; gap: .6rem; font-family: var(--display); font-size: 1.5rem; font-weight: 700; color: var(--gold-soft); text-decoration: none; }
+.site-header nav { display: flex; gap: 1.5rem; }
+.site-header nav a { color: var(--mist); text-decoration: none; font-size: .95rem; }
+.site-header nav a:hover { color: var(--gold-soft); text-decoration: underline; text-underline-offset: 4px; }
+.site-footer { padding: 3rem 0 2.5rem; color: var(--mist); font-size: .9rem; border-top: 1px solid var(--line); margin-top: 5rem; }
+.site-footer p { margin: 0; }
+
+.hero { display: grid; grid-template-columns: 1.05fr .95fr; gap: 4rem; align-items: center; padding: 2.5rem 0 1rem; }
+.lede { max-width: 34rem; color: var(--mist); font-size: 1.15rem; margin: 1.25rem 0 2rem; }
+.clock-form { display: grid; gap: 1.25rem; max-width: 34rem; }
+.field { display: grid; gap: .4rem; }
+label { font-weight: 500; color: var(--gold-soft); font-size: .95rem; }
+input, textarea { width: 100%; padding: .8rem 1rem; border-radius: 8px; border: 1px solid var(--line); background: rgba(45, 18, 89, .55); color: #fff; font: inherit; }
+textarea { resize: vertical; min-height: 4.2rem; }
+input::placeholder, textarea::placeholder { color: rgba(201, 184, 230, .6); }
+input:focus, textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(232, 193, 86, .25); }
+.chips { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .25rem; }
+.chip { font: inherit; font-size: .85rem; color: var(--mist); cursor: pointer; background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: .3rem .65rem; }
+.chip:hover { color: var(--night); background: var(--gold); border-color: var(--gold); }
+.btn { display: inline-flex; align-items: center; justify-content: center; font: inherit; font-weight: 600; font-size: 1rem; text-decoration: none; cursor: pointer; padding: .75rem 1.4rem; border-radius: 8px; color: var(--gold-soft); background: transparent; border: 1px solid var(--gold); }
+.btn:hover { background: rgba(232, 193, 86, .14); }
+.btn-primary { background: var(--gold); color: var(--night); }
+.btn-primary:hover { background: #f3d36b; }
+.clock-form .btn-primary { justify-self: start; }
+
+.hero-clock { display: grid; justify-items: center; gap: 1rem; }
+.stage { position: relative; width: min(100%, 460px); aspect-ratio: 1; }
+.stage::before { content: ""; position: absolute; inset: -9%; border: 1px solid var(--line); border-radius: 50%; box-shadow: 0 0 0 14px rgba(232, 193, 86, .04); }
+.stage svg { position: relative; width: 100%; height: 100%; display: block; filter: drop-shadow(0 22px 34px rgba(0, 0, 0, .55)); }
+.stage.is-fresh svg { animation: settle .6s cubic-bezier(.2, .7, .2, 1); }
+@keyframes settle { from { opacity: .35; transform: scale(.95) rotate(-4deg); } to { opacity: 1; transform: none; } }
+.preview-note { margin: 0; color: var(--mist); text-align: center; min-height: 1.6em; max-width: 30rem; }
+.hint { margin: 0; color: var(--gold-soft); font-size: .92rem; text-align: center; max-width: 30rem; }
+.actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .6rem; }
+.actions .btn { padding: .6rem 1.1rem; font-size: .95rem; }
+.status { margin: 0; min-height: 1.5em; color: var(--gold-soft); font-size: .92rem; text-align: center; }
+
+.section { padding-top: 5rem; }
+.section-intro { color: var(--mist); max-width: 40rem; margin: .75rem 0 2.5rem; }
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 2.5rem 2rem; }
+.gallery figure { margin: 0; }
+.gallery button.card { display: block; width: 100%; padding: 0; background: none; border: 0; cursor: pointer; color: inherit; font: inherit; text-align: left; }
+.gallery .card .dial { display: block; transition: transform .2s; }
+.gallery .card:hover .dial { transform: translateY(-4px); }
+.gallery svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 14px 20px rgba(0, 0, 0, .5)); }
+.gallery .cap { display: grid; margin-top: .9rem; }
+.gallery .cap strong { font-family: var(--display); font-size: 1.45rem; color: var(--gold-soft); line-height: 1.2; }
+.gallery .cap span { color: var(--mist); font-size: .92rem; font-weight: 400; }
+.words { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5rem 2.5rem; margin: 0; }
+.words div { border-top: 1px solid var(--line); padding-top: .75rem; }
+.words dt { font-family: var(--display); font-size: 1.4rem; font-weight: 600; color: var(--gold); }
+.words dd { margin: .2rem 0 0; color: var(--mist); font-size: .95rem; }
+
+/* Moral */
+.moral-note { color: var(--gold); font-size: .9rem; font-weight: 500; text-decoration: none; border-bottom: 1px dashed var(--line); padding-bottom: 2px; }
+.moral-note:hover { color: var(--gold-soft); border-bottom-color: var(--gold); }
+.moral { display: grid; grid-template-columns: 1fr auto; gap: 3rem; align-items: center; }
+.moral p { max-width: 36rem; color: var(--mist); margin: 1rem 0 0; font-size: 1.1rem; }
+.moral p strong { color: var(--gold-soft); font-weight: 600; }
+.phone { width: 150px; justify-self: center; }
+.phone svg { width: 100%; height: auto; display: block; filter: drop-shadow(0 14px 20px rgba(0,0,0,.5)); }
+.phone-time { font-family: var(--display); font-weight: 600; }
+.pulse { animation: pulse 1.8s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .35; } }
+
+@media (max-width: 880px) {
+  .moral { grid-template-columns: 1fr; }
+  .site-header { flex-wrap: wrap; gap: .5rem 1rem; }
+  .hero { grid-template-columns: 1fr; gap: 2.5rem; }
+  .hero-clock { order: -1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .stage.is-fresh svg, .gallery .card .dial, .pulse { animation: none; transition: none; }
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="#top">
+    <svg width="28" height="28" viewBox="0 0 400 400" aria-hidden="true"><circle cx="200" cy="200" r="190" fill="#d9ac35"/><circle cx="200" cy="200" r="160" fill="#3b1a78"/><path d="M200 200V80M200 200l85 45" stroke="#f6e7b4" stroke-width="18" stroke-linecap="round"/></svg>
+    Gilded Hours
+  </a>
+  <nav aria-label="Main"><a href="#gallery">Gallery</a><a href="#words">Words that work</a><a class="moral-note" href="#moral">Before you go further, read the bottom of this page ↓</a></nav>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div>
+      <h1>Your name, on a clock no one else has.</h1>
+      <p class="lede">Tell us your name and the kind of clock you imagine. We draw it in purple and gold, set it ticking, and let you keep it.</p>
+      <form class="clock-form" id="form" novalidate>
+        <div class="field">
+          <label for="name">Your name</label>
+          <input id="name" name="name" type="text" maxlength="24" autocomplete="given-name" placeholder="Meera">
+        </div>
+        <div class="field">
+          <label for="idea">The clock you imagine</label>
+          <textarea id="idea" name="idea" rows="2" maxlength="120" placeholder="Midnight garden with roman numerals"></textarea>
+          <div class="chips" id="chips" role="group" aria-label="Example ideas"></div>
+        </div>
+        <button class="btn btn-primary" type="submit">Make my clock</button>
+      </form>
+    </div>
+
+    <div class="hero-clock">
+      <div class="stage" id="stage"></div>
+      <p class="preview-note" id="summary" aria-live="polite"></p>
+      <p class="hint" id="hint" hidden></p>
+      <div class="actions">
+        <button class="btn btn-primary" type="button" id="dl-svg">Download SVG</button>
+        <button class="btn" type="button" id="dl-png">Download PNG</button>
+        <button class="btn" type="button" id="copy">Copy link</button>
+        <button class="btn" type="button" id="remix">Remix</button>
+      </div>
+      <p class="status" id="status" role="status"></p>
+    </div>
+  </section>
+
+  <section class="section" id="gallery">
+    <h2>Clocks made this way</h2>
+    <p class="section-intro">Each one started as a name and a sentence. Pick one to load it above and make it your own.</p>
+    <div class="gallery" id="gallery-grid"></div>
+  </section>
+
+  <section class="section" id="words">
+    <h2>Words that shape your clock</h2>
+    <p class="section-intro">Use any of these in your idea. Combine them freely. If none match, we pick a style for you, and Remix gives you another take.</p>
+    <dl class="words" id="words-list"></dl>
+  </section>
+
+  <section class="section moral" id="moral">
+    <div>
+      <h2>Time is more precious than this page.</h2>
+      <p>You have just spent precious minutes choosing words, remixing designs and admiring gold hands on a purple face. Lovely, but <strong>time is worth far more than a customized clock.</strong></p>
+      <p>Next time you want to know the time, skip the clock-making and <strong>press the power button on your phone.</strong> It is right there on the lock screen, and it is free.</p>
+    </div>
+    <div class="phone" aria-hidden="true">
+      <svg viewBox="0 0 150 280">
+        <rect x="4" y="4" width="136" height="272" rx="26" fill="#2d1259" stroke="#e8c156" stroke-width="3"/>
+        <rect x="14" y="16" width="116" height="248" rx="18" fill="#12052b"/>
+        <rect x="54" y="24" width="36" height="9" rx="4.5" fill="#2d1259"/>
+        <text id="phone-time" class="phone-time" x="72" y="118" text-anchor="middle" font-size="40" fill="#f6e7b4">10:10</text>
+        <text id="phone-date" x="72" y="142" text-anchor="middle" font-size="11" fill="#c9b8e6" font-family="sans-serif"></text>
+        <rect x="140" y="84" width="6" height="44" rx="3" fill="#e8c156" class="pulse"/>
+        <text x="72" y="236" text-anchor="middle" font-size="10" fill="#e8c156" font-family="sans-serif">Press this →</text>
+      </svg>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer"><p>Every clock is drawn as SVG, so it stays sharp at any size. Made in your browser; nothing is sent anywhere.</p></footer>
+
+<script>
+(() => {
+  "use strict";
+
+  /* ------------------------------------------------------------------
+     Themes
+  ------------------------------------------------------------------ */
+  const P = (face_inner, face_outer, ink, motif, hand) => ({ face_inner, face_outer, ink, motif, hand });
+  const THEMES = {
+    celestial: { label: "Celestial", numerals: "roman",
+      keywords: ["star", "moon", "galaxy", "space", "night", "cosmic", "cosmos", "astro", "planet", "universe", "sky"],
+      palette: P("#3b1a78", "#0d0522", "#f6e7b4", "#f2c94c", "#f6e7b4") },
+    floral: { label: "Floral", numerals: "arabic",
+      keywords: ["flower", "floral", "rose", "garden", "bloom", "blossom", "spring", "petal", "lotus", "jasmine"],
+      palette: P("#8a3aa0", "#3c1257", "#fbe9c0", "#ffd9ec", "#f6d98a") },
+    steampunk: { label: "Steampunk", numerals: "roman",
+      keywords: ["steam", "gear", "cog", "vintage", "industrial", "mechanic", "antique", "brass", "victorian", "clockwork"],
+      palette: P("#5b3a1e", "#1d1109", "#f0d9a0", "#d9a441", "#f0d9a0") },
+    ocean: { label: "Ocean", numerals: "arabic",
+      keywords: ["ocean", "sea", "wave", "beach", "water", "marine", "surf", "aqua", "coast"],
+      palette: P("#1d5f93", "#071e3d", "#fff1c9", "#9fe3ff", "#f2c94c") },
+    royal: { label: "Royal", numerals: "roman",
+      keywords: ["royal", "king", "queen", "crown", "luxury", "palace", "regal", "empire", "throne", "elegant", "gold"],
+      palette: P("#5a1a8f", "#240847", "#f7e08a", "#f2c94c", "#f7e08a") },
+    forest: { label: "Forest", numerals: "arabic",
+      keywords: ["forest", "nature", "leaf", "leaves", "tree", "green", "jungle", "woods", "plant", "eco"],
+      palette: P("#25704a", "#0a2b1c", "#f6e7b4", "#a8e6a1", "#f2c94c") },
+    cyber: { label: "Cyber", numerals: "dots",
+      keywords: ["cyber", "tech", "neon", "futur", "digital", "robot", "circuit", "code", "hacker", "ai", "pixel"],
+      palette: P("#1a0a4d", "#05010f", "#7cf5ff", "#39f0ff", "#f2c94c") },
+    love: { label: "Romantic", numerals: "roman",
+      keywords: ["love", "heart", "romantic", "romance", "wedding", "valentine", "couple", "anniversary"],
+      palette: P("#a02a6b", "#3d0a33", "#ffe7c2", "#ffb3d1", "#f6d98a") },
+    sunrise: { label: "Sunrise", numerals: "arabic",
+      keywords: ["sun", "sunny", "sunrise", "sunset", "summer", "solar", "dawn"],
+      palette: P("#8a2f6a", "#3b0f4a", "#fff0c2", "#ffc94a", "#fff0c2") },
+    minimal: { label: "Minimal", numerals: "none",
+      keywords: ["minimal", "simple", "clean", "modern", "plain", "sleek", "classic"],
+      palette: P("#2d1259", "#1a0836", "#f2c94c", "#f2c94c", "#f2c94c") },
+  };
+  const LIGHT_PALETTE = P("#fffaf0", "#ecdcb0", "#3b1466", "#6b2fa8", "#3b1466");
+  const LIGHT_WORDS = ["light", "white", "ivory", "pearl", "cream", "bright"];
+  const SHAPE_WORDS = { hexagon: ["hexagon", "hexagonal", "hex"], square: ["square", "squar"], circle: ["round", "circle", "circular"] };
+  const NUMERAL_WORDS = {
+    roman: ["roman"], dots: ["dot", "dots", "dotted"], none: ["ticks", "tick", "unmarked", "blank"],
+    arabic: ["number", "numbers", "numeral", "numerals", "arabic", "digit", "digits"],
+  };
+  const SHAPE_LABELS = { circle: "round", square: "rounded square", hexagon: "hexagonal" };
+  const NUMERAL_LABELS = { arabic: "numbers", roman: "Roman numerals", dots: "dot markers", none: "tick marks only" };
+
+  const MAX_NAME = 24, MAX_IDEA = 120;
+  const DEFAULT_NAME = "Your name";
+  const DEFAULT_IDEA = "Midnight garden with roman numerals";
+  const DEFAULT_TIME = [10, 10, 30];
+  const EXAMPLES = [
+    ["Meera", "Midnight garden with roman numerals"],
+    ["Arjun", "Steampunk gears and brass"],
+    ["Kavya", "Starry galaxy night sky"],
+    ["Rohan", "Royal crown in gold"],
+    ["Isha", "Calm ocean waves, light and simple"],
+    ["Dev", "Neon cyber circuit on a hexagon"],
+  ];
+
+  /* ------------------------------------------------------------------
+     Parsing an idea into a clock spec
+  ------------------------------------------------------------------ */
+  const cleanText = (v, limit) => String(v || "").replace(/[\x00-\x1f\x7f]/g, " ").replace(/\s+/g, " ").trim().slice(0, limit);
+
+  const hit = (tokens, words) =>
+    tokens.some((t) => words.some((w) => t === w || (w.length > 3 && t.startsWith(w))));
+
+  // Small deterministic hash (cyrb53-style, folded to 32 bits) and seeded RNG.
+  function hash32(str) {
+    let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (let i = 0; i < str.length; i++) {
+      const ch = str.charCodeAt(i);
+      h1 = Math.imul(h1 ^ ch, 2654435761);
+      h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (h1 ^ h2) >>> 0;
+  }
+  function mulberry32(a) {
+    return () => {
+      a = (a + 0x6d2b79f5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function parseRequest(nameIn, ideaIn, variant = 0) {
+    const name = cleanText(nameIn, MAX_NAME) || DEFAULT_NAME;
+    const idea = cleanText(ideaIn, MAX_IDEA);
+    const text = idea.toLowerCase();
+    const tokens = text.match(/[a-z]+/g) || [];
+    const seed = hash32(`${name.toLowerCase()}|${text}|${variant}`);
+
+    const keys = Object.keys(THEMES);
+    const scores = keys.map((k) => tokens.filter((t) => hit([t], THEMES[k].keywords)).length);
+    const best = Math.max(...scores);
+    const matched = best > 0;
+    const theme = matched ? keys[scores.indexOf(best)] : keys.slice().sort()[seed % keys.length];
+
+    let shape = "circle";
+    for (const k of ["hexagon", "square", "circle"]) if (hit(tokens, SHAPE_WORDS[k])) { shape = k; break; }
+
+    let numerals = THEMES[theme].numerals;
+    if (/\bno (numbers|numerals|digits)\b/.test(text)) numerals = "none";
+    else for (const k of ["roman", "dots", "none", "arabic"]) if (hit(tokens, NUMERAL_WORDS[k])) { numerals = k; break; }
+
+    return { name, idea, theme, shape, numerals, light: hit(tokens, LIGHT_WORDS), matched, seed };
+  }
+
+  const summary = (s) =>
+    `A ${s.light ? "light " : ""}${THEMES[s.theme].label.toLowerCase()} clock with ${NUMERAL_LABELS[s.numerals]} on a ${SHAPE_LABELS[s.shape]} face.`;
+
+  /* ------------------------------------------------------------------
+     Decorative motifs (400x400 space, kept inside radius ~158)
+  ------------------------------------------------------------------ */
+  const CX = 200, CY = 200;
+  const polar = (r, deg) => { const a = (deg * Math.PI) / 180; return [CX + r * Math.sin(a), CY - r * Math.cos(a)]; };
+  const f1 = (n) => n.toFixed(1);
+
+  function gearPath(cx, cy, rOut, rIn, teeth, rot = 0) {
+    const step = 360 / teeth, pts = [];
+    for (let i = 0; i < teeth; i++) {
+      for (const [off, r] of [[0, rIn], [0.2, rOut], [0.5, rOut], [0.7, rIn]]) {
+        const ang = ((rot + (i + off) * step) * Math.PI) / 180;
+        pts.push(`${f1(cx + r * Math.cos(ang))},${f1(cy + r * Math.sin(ang))}`);
+      }
+    }
+    return "M" + pts.join(" L") + " Z";
+  }
+  const sparkle = (x, y, s) =>
+    `<path transform="translate(${f1(x)} ${f1(y)})" d="M0 -${s} Q0 0 ${s} 0 Q0 0 0 ${s} Q0 0 -${s} 0 Q0 0 0 -${s}Z"/>`;
+  const HEART = "M0,-3 C-6,-12 -18,-4 -9,6 L0,14 L9,6 C18,-4 6,-12 0,-3Z";
+  const LEAF = "M0 0 C14 -14 14 -34 0 -50 C-14 -34 -14 -14 0 0Z";
+
+  const MOTIFS = {
+    celestial(rnd, c) {
+      let o = `<g fill="${c}">`;
+      for (let i = 0; i < 46; i++) {
+        const [x, y] = polar(152 * Math.sqrt(rnd()), rnd() * 360);
+        o += `<circle cx="${f1(x)}" cy="${f1(y)}" r="${(0.6 + rnd() * 1.6).toFixed(1)}" opacity="${(0.25 + rnd() * 0.6).toFixed(2)}"/>`;
+      }
+      for (let i = 0; i < 9; i++) {
+        const [x, y] = polar(25 + 125 * Math.sqrt(rnd()), rnd() * 360);
+        o += `<g opacity="0.8">${sparkle(x, y, 3 + rnd() * 4)}</g>`;
+      }
+      o += "</g>";
+      o += `<g fill="none" stroke="${c}" stroke-width="0.8" opacity="0.22" stroke-dasharray="2 5"><circle cx="200" cy="200" r="112"/><circle cx="200" cy="200" r="72"/></g>`;
+      return o;
+    },
+    floral(rnd, c) {
+      let o = `<g fill="${c}">`;
+      for (const [n, off, rx, ry, op, rot] of [[12, 98, 16, 44, 0.13, 0], [12, 72, 11, 32, 0.17, 15], [8, 40, 8, 22, 0.2, 0]]) {
+        for (let i = 0; i < n; i++) {
+          o += `<ellipse cx="200" cy="${200 - off}" rx="${rx}" ry="${ry}" opacity="${op}" transform="rotate(${(rot + (i * 360) / n).toFixed(1)} 200 200)"/>`;
+        }
+      }
+      return o + `<circle cx="200" cy="200" r="16" opacity="0.2"/></g>`;
+    },
+    steampunk(rnd, c) {
+      let o = `<g fill="${c}" fill-opacity="0.16" stroke="${c}" stroke-opacity="0.4" stroke-width="1.2">`;
+      for (const [gx, gy, ro, ri, teeth] of [[128, 262, 46, 38, 14], [268, 146, 40, 33, 12], [252, 270, 27, 21, 10], [124, 138, 25, 19, 9]]) {
+        o += `<path d="${gearPath(gx, gy, ro, ri, teeth, rnd() * 30)}"/><circle cx="${gx}" cy="${gy}" r="${(ri * 0.42).toFixed(1)}" fill="none"/>`;
+      }
+      return o + "</g>";
+    },
+    ocean(rnd, c) {
+      let o = `<g fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round">`;
+      for (let i = 0; i < 7; i++) {
+        const y = 78 + i * 24, amp = 5 + rnd() * 4, phase = rnd() * 6, pts = [];
+        for (let x = 30; x < 372; x += 8) pts.push(`${x},${(y + amp * Math.sin(x / 38 + phase + i)).toFixed(1)}`);
+        o += `<path d="M${pts.join(" L")}" opacity="${(0.14 + 0.05 * (i % 3)).toFixed(2)}"/>`;
+      }
+      return o + "</g>";
+    },
+    royal(rnd, c) {
+      let o = `<g fill="${c}">`;
+      for (let i = 0; i < 36; i++) {
+        const a = i * 10, [x1, y1] = polar(156, a - 2.2), [x2, y2] = polar(156, a + 2.2);
+        o += `<path d="M200 200 L${f1(x1)} ${f1(y1)} L${f1(x2)} ${f1(y2)}Z" opacity="${i % 2 ? 0.1 : 0.05}"/>`;
+      }
+      o += "</g>";
+      return o + `<g fill="none" stroke="${c}"><circle cx="200" cy="200" r="118" stroke-width="1.2" stroke-dasharray="2 6" opacity="0.5"/><circle cx="200" cy="200" r="62" stroke-width="0.8" opacity="0.3"/></g>`;
+    },
+    forest(rnd, c) {
+      let o = `<g fill="${c}">`;
+      for (const [n, off, scale, op, rot] of [[16, 108, 1.0, 0.15, 0], [12, 70, 0.66, 0.2, 15]]) {
+        for (let i = 0; i < n; i++) {
+          o += `<path d="${LEAF}" opacity="${op}" transform="rotate(${(rot + (i * 360) / n).toFixed(1)} 200 200) translate(200 ${200 - off}) scale(${scale})"/>`;
+        }
+      }
+      return o + "</g>";
+    },
+    cyber(rnd, c) {
+      let o = `<g fill="none" stroke="${c}" stroke-width="1" opacity="0.4">`;
+      for (const r of [58, 98, 138]) o += `<circle cx="200" cy="200" r="${r}" stroke-dasharray="${3 + Math.floor(r / 30)} 6"/>`;
+      o += `</g><g stroke="${c}" fill="${c}" stroke-width="1">`;
+      for (let i = 0; i < 24; i++) {
+        const a = i * 15, r0 = 40 + rnd() * 20, r1 = 70 + rnd() * 80;
+        const [x0, y0] = polar(r0, a), [x1, y1] = polar(r1, a);
+        o += `<path d="M${f1(x0)} ${f1(y0)} L${f1(x1)} ${f1(y1)}" opacity="0.28"/><circle cx="${f1(x1)}" cy="${f1(y1)}" r="2.2" opacity="0.7"/>`;
+      }
+      return o + "</g>";
+    },
+    love(rnd, c) {
+      let o = `<g fill="${c}">`;
+      for (let i = 0; i < 15; i++) {
+        const [x, y] = polar(25 + 125 * Math.sqrt(rnd()), rnd() * 360);
+        o += `<path d="${HEART}" opacity="${(0.14 + rnd() * 0.2).toFixed(2)}" transform="translate(${f1(x)} ${f1(y)}) rotate(${Math.round(-25 + rnd() * 50)}) scale(${(0.5 + rnd() * 0.9).toFixed(2)})"/>`;
+      }
+      return o + "</g>";
+    },
+    sunrise(rnd, c) {
+      let o = `<g fill="${c}">`;
+      for (let i = 0; i < 24; i++) {
+        const a = i * 15, [x1, y1] = polar(156, a - 2), [x2, y2] = polar(156, a + 2), [x0, y0] = polar(44, a);
+        o += `<path d="M${f1(x0)} ${f1(y0)} L${f1(x1)} ${f1(y1)} L${f1(x2)} ${f1(y2)}Z" opacity="${i % 2 ? 0.2 : 0.1}"/>`;
+      }
+      return o + `</g><circle cx="200" cy="200" r="44" fill="none" stroke="${c}" stroke-width="1.2" opacity="0.5"/>`;
+    },
+    minimal(rnd, c) {
+      return `<g fill="none" stroke="${c}"><circle cx="200" cy="200" r="118" stroke-width="0.8" opacity="0.3"/><circle cx="200" cy="200" r="60" stroke-width="0.8" opacity="0.18"/></g>`;
+    },
+  };
+
+  function emblem(theme, c) {
+    const rays = (n, d, w) => Array.from({ length: n }, (_, i) => `<path d="${d}" stroke="${c}" stroke-width="${w}" stroke-linecap="round" transform="rotate(${i * (360 / n)})"/>`).join("");
+    const shapes = {
+      celestial: `<path d="M6 -11 A12 12 0 1 0 6 11 A9 9 0 1 1 6 -11Z" fill="${c}"/>`,
+      floral: Array.from({ length: 5 }, (_, i) => `<ellipse cx="0" cy="-7" rx="3.6" ry="7" fill="${c}" transform="rotate(${i * 72})"/>`).join("") + `<circle r="2.6" fill="${c}" opacity="0.6"/>`,
+      steampunk: `<path d="${gearPath(0, 0, 12, 9, 8)}" fill="${c}"/><circle r="3.5" fill="#00000066"/>`,
+      ocean: `<path d="M-14 0 Q-7 -8 0 0 T14 0 M-14 7 Q-7 -1 0 7 T14 7" fill="none" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/>`,
+      royal: `<path d="M-14 9 L-14 -6 L-7 0 L0 -11 L7 0 L14 -6 L14 9Z" fill="${c}"/>`,
+      forest: `<path d="${LEAF}" fill="${c}" transform="translate(0 12) scale(0.45)"/>`,
+      cyber: `<path d="M0 -12 L12 0 L0 12 L-12 0Z" fill="none" stroke="${c}" stroke-width="2"/><circle r="3" fill="${c}"/>`,
+      love: `<path d="${HEART}" fill="${c}" transform="translate(0 -2) scale(0.9)"/>`,
+      sunrise: `<circle r="6" fill="${c}"/>` + rays(8, "M0 -9 L0 -13", 2),
+      minimal: `<path d="M0 -8 L8 0 L0 8 L-8 0Z" fill="${c}"/>`,
+    };
+    return shapes[theme];
+  }
+
+  /* ------------------------------------------------------------------
+     SVG renderer
+  ------------------------------------------------------------------ */
+  const ROMAN = ["XII", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"];
+  const SERIF = "'Cormorant Garamond', 'Cinzel', Georgia, 'Times New Roman', serif";
+  const GEOMETRY = { circle: { bezel: 190, face: 172, tick: 166 }, square: { bezel: 190, face: 173, tick: 166 }, hexagon: { bezel: 196, face: 180, tick: 150 } };
+  const escapeXml = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+  function shapePath(shape, r) {
+    if (shape === "circle") return `M${CX - r} ${CY} a${r} ${r} 0 1 0 ${2 * r} 0 a${r} ${r} 0 1 0 ${-2 * r} 0Z`;
+    if (shape === "square") {
+      const c = 0.22 * r, w = 2 * r, x = CX - r, y = CY - r, s = w - 2 * c;
+      return `M${f1(x + c)} ${f1(y)} h${f1(s)} a${f1(c)} ${f1(c)} 0 0 1 ${f1(c)} ${f1(c)} v${f1(s)} a${f1(c)} ${f1(c)} 0 0 1 ${f1(-c)} ${f1(c)} h${f1(-s)} a${f1(c)} ${f1(c)} 0 0 1 ${f1(-c)} ${f1(-c)} v${f1(-s)} a${f1(c)} ${f1(c)} 0 0 1 ${f1(c)} ${f1(-c)}Z`;
+    }
+    const pts = [];
+    for (let i = 0; i < 6; i++) { const [x, y] = polar(r, i * 60); pts.push(`${f1(x)} ${f1(y)}`); }
+    return "M" + pts.join(" L") + "Z";
+  }
+
+  function ticks(ink, numerals) {
+    let minor = "", major = "";
+    for (let i = 0; i < 60; i++) {
+      const deg = i * 6, [x1, y1] = polar(166, deg);
+      if (i % 5 === 0) { const [x2, y2] = polar(numerals !== "none" ? 150 : 146, deg); major += `M${f1(x1)} ${f1(y1)}L${f1(x2)} ${f1(y2)}`; }
+      else { const [x2, y2] = polar(159, deg); minor += `M${f1(x1)} ${f1(y1)}L${f1(x2)} ${f1(y2)}`; }
+    }
+    return `<path d="${minor}" stroke="${ink}" stroke-width="1" opacity="0.7" fill="none"/><path d="${major}" stroke="${ink}" stroke-width="${numerals === "none" ? 3.6 : 2.4}" stroke-linecap="round" fill="none"/>`;
+  }
+
+  function numeralsSvg(style, ink) {
+    if (style === "none") return "";
+    let o = "";
+    for (let h = 1; h <= 12; h++) {
+      const [x, y] = polar(134, h * 30);
+      if (style === "dots") o += `<circle cx="${f1(x)}" cy="${f1(y)}" r="${h % 3 === 0 ? 7 : 4.5}" fill="${ink}"/>`;
+      else o += `<text x="${f1(x)}" y="${f1(y)}" dy=".35em" text-anchor="middle" font-size="${style === "roman" ? 17 : 21}" font-weight="600" fill="${ink}">${style === "roman" ? ROMAN[h % 12] : h}</text>`;
+    }
+    return `<g font-family="${SERIF}">${o}</g>`;
+  }
+
+  function hand(cls, angle, period, inner, animate) {
+    const anim = animate ? `<animateTransform attributeName="transform" type="rotate" from="${angle.toFixed(2)} 200 200" to="${(angle + 360).toFixed(2)} 200 200" dur="${period}s" repeatCount="indefinite"/>` : "";
+    return `<g class="${cls}" transform="rotate(${angle.toFixed(2)} 200 200)">${inner}${anim}</g>`;
+  }
+
+  function buildSvg(spec, now = DEFAULT_TIME, animate = false, uid = null) {
+    uid = uid || `c${spec.seed % 1000000}`;
+    const pal = spec.light ? LIGHT_PALETTE : THEMES[spec.theme].palette;
+    const geo = GEOMETRY[spec.shape], scale = geo.tick / 166, rnd = mulberry32(spec.seed);
+    const [h, m, s] = now;
+    const aSec = s * 6, aMin = (m + s / 60) * 6, aHour = ((h % 12) + m / 60 + s / 3600) * 30;
+
+    const name = escapeXml(spec.name), n = spec.name.length;
+    const font = n <= 8 ? 22 : Math.max(11, 22 - (n - 8) * 0.7), spacing = n <= 12 ? 3 : 1.5;
+    const gold = `${uid}-gold`, face = `${uid}-face`, shadow = `${uid}-shadow`, clip = `${uid}-clip`, arc = `${uid}-arc`;
+
+    const defs = `<defs>
+<linearGradient id="${gold}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbeaa0"/><stop offset=".45" stop-color="#d9ac35"/><stop offset=".7" stop-color="#f3d36b"/><stop offset="1" stop-color="#8a6a1b"/></linearGradient>
+<radialGradient id="${face}" gradientUnits="userSpaceOnUse" cx="200" cy="165" r="215"><stop offset="0" stop-color="${pal.face_inner}"/><stop offset="1" stop-color="${pal.face_outer}"/></radialGradient>
+<filter id="${shadow}" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="1.5" dy="2.5" stdDeviation="2" flood-color="#000" flood-opacity=".45"/></filter>
+<clipPath id="${clip}"><circle cx="200" cy="200" r="162"/></clipPath>
+<path id="${arc}" d="M108 200 A92 92 0 0 0 292 200"/>
+</defs>`;
+
+    const body = [
+      `<path d="${shapePath(spec.shape, geo.bezel)}" fill="url(#${gold})"/>`,
+      `<path d="${shapePath(spec.shape, geo.bezel - 9)}" fill="#12052b" fill-opacity=".45"/>`,
+      `<path d="${shapePath(spec.shape, geo.face)}" fill="url(#${face})" stroke="#f3d36b" stroke-opacity=".7" stroke-width="1.5"/>`,
+    ];
+    const inner =
+      `<g clip-path="url(#${clip})">${MOTIFS[spec.theme](rnd, pal.motif)}</g>` +
+      ticks(pal.ink, spec.numerals) +
+      numeralsSvg(spec.numerals, pal.ink) +
+      `<g transform="translate(200 132)" opacity=".95">${emblem(spec.theme, spec.light ? pal.ink : pal.motif)}</g>` +
+      `<text font-family="${SERIF}" font-size="${font.toFixed(1)}" font-weight="700" letter-spacing="${spacing}" fill="${pal.ink}" text-anchor="middle"><textPath href="#${arc}" startOffset="50%">${name}</textPath></text>`;
+    body.push(scale === 1 ? inner : `<g transform="translate(200 200) scale(${scale.toFixed(4)}) translate(-200 -200)">${inner}</g>`);
+
+    const fill = spec.light ? pal.hand : `url(#${gold})`;
+    const edge = `stroke="#12052b" stroke-opacity=".5" stroke-width=".8"`;
+    const hour = `<path d="M200 214 L194 205 L197 138 L200 124 L203 138 L206 205Z" fill="${fill}" ${edge}/>`;
+    const minute = `<path d="M200 216 L195.5 205 L198 82 L200 62 L202 82 L204.5 205Z" fill="${fill}" ${edge}/>`;
+    const second = `<path d="M200 224 L200 52" stroke="${pal.hand}" stroke-width="1.6" stroke-linecap="round"/><circle cx="200" cy="228" r="5" fill="${pal.hand}"/><circle cx="200" cy="72" r="3.2" fill="${pal.hand}"/>`;
+    const hands = `<g filter="url(#${shadow})">${hand("hand-hour", aHour, 43200, hour, animate)}${hand("hand-minute", aMin, 3600, minute, animate)}${hand("hand-second", aSec, 60, second, animate)}</g><circle cx="200" cy="200" r="9" fill="url(#${gold})"/><circle cx="200" cy="200" r="3.2" fill="#12052b"/>`;
+
+    const label = escapeXml(`Personalized clock for ${spec.name}`);
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="${label}"><title>${label}</title>${defs}${body.join("")}${hands}</svg>`;
+  }
+
+  /* ------------------------------------------------------------------
+     Page behaviour
+  ------------------------------------------------------------------ */
+  const $ = (id) => document.getElementById(id);
+  const form = $("form"), nameInput = $("name"), ideaInput = $("idea");
+  const stage = $("stage"), note = $("summary"), hint = $("hint"), status = $("status");
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let variant = 0, spec = null, statusTimer;
+
+  const say = (text) => {
+    status.textContent = text;
+    clearTimeout(statusTimer);
+    statusTimer = setTimeout(() => (status.textContent = ""), 5000);
+  };
+  const slug = (t) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "clock";
+  const nowParts = () => { const d = new Date(); return [d.getHours(), d.getMinutes(), d.getSeconds()]; };
+
+  function render(animateIn = true) {
+    spec = parseRequest(nameInput.value, ideaInput.value || DEFAULT_IDEA, variant);
+    stage.innerHTML = buildSvg(spec, nowParts(), false, "hero");
+    note.textContent = summary(spec);
+    hint.hidden = spec.matched || !ideaInput.value.trim();
+    hint.textContent = "None of the words in your idea matched a style, so we picked one for you. Try words like starry, garden or steampunk, or press Remix.";
+    if (animateIn) { stage.classList.remove("is-fresh"); void stage.offsetWidth; stage.classList.add("is-fresh"); }
+
+    const url = new URL(location.href);
+    if (nameInput.value.trim()) {
+      url.searchParams.set("name", nameInput.value.trim());
+      ideaInput.value.trim() ? url.searchParams.set("idea", ideaInput.value.trim()) : url.searchParams.delete("idea");
+      variant ? url.searchParams.set("v", variant) : url.searchParams.delete("v");
+    } else {
+      ["name", "idea", "v"].forEach((k) => url.searchParams.delete(k));
+    }
+    history.replaceState(null, "", url);
+  }
+
+  // Hands follow the visitor's clock.
+  function tick() {
+    const d = new Date();
+    const sec = d.getSeconds() + (reduceMotion ? 0 : d.getMilliseconds() / 1000);
+    const min = d.getMinutes() + sec / 60;
+    const hr = (d.getHours() % 12) + min / 60;
+    const turn = (el, deg) => el && el.setAttribute("transform", `rotate(${deg.toFixed(2)} 200 200)`);
+    document.querySelectorAll("svg").forEach((svg) => {
+      turn(svg.querySelector(".hand-hour"), hr * 30);
+      turn(svg.querySelector(".hand-minute"), min * 6);
+      turn(svg.querySelector(".hand-second"), sec * 6);
+    });
+  }
+  if (reduceMotion) setInterval(tick, 1000);
+  else (function loop() { tick(); requestAnimationFrame(loop); })();
+
+  function download(blob, filename) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+
+  // Inputs
+  let timer;
+  form.addEventListener("input", () => { variant = 0; clearTimeout(timer); timer = setTimeout(render, 150); });
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!nameInput.value.trim()) { nameInput.focus(); say("Enter a name so we can put it on the clock face."); return; }
+    render();
+    say(`Made for ${spec.name}.`);
+  });
+
+  $("chips").innerHTML = EXAMPLES.map(([, idea]) => `<button type="button" class="chip" data-idea="${escapeXml(idea)}">${escapeXml(idea)}</button>`).join("");
+  $("chips").addEventListener("click", (e) => {
+    const chip = e.target.closest("[data-idea]");
+    if (!chip) return;
+    ideaInput.value = chip.dataset.idea;
+    variant = 0;
+    render();
+  });
+
+  // Actions
+  $("remix").addEventListener("click", () => { variant += 1; render(); say("Here’s another take."); });
+
+  $("dl-svg").addEventListener("click", () => {
+    if (!nameInput.value.trim()) { nameInput.focus(); say("Enter a name first so it appears on the clock."); return; }
+    download(new Blob([buildSvg(spec, nowParts(), true)], { type: "image/svg+xml" }), `${slug(spec.name)}-clock.svg`);
+    say("SVG downloaded. Open it in a browser and the hands keep ticking.");
+  });
+
+  $("dl-png").addEventListener("click", () => {
+    if (!nameInput.value.trim()) { nameInput.focus(); say("Enter a name first so it appears on the clock."); return; }
+    const size = 1600, svg = stage.querySelector("svg").cloneNode(true);
+    svg.setAttribute("width", size);
+    svg.setAttribute("height", size);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = size;
+      canvas.getContext("2d").drawImage(img, 0, 0, size, size);
+      canvas.toBlob((blob) => { download(blob, `${slug(spec.name)}-clock.png`); say("PNG downloaded."); });
+    };
+    img.onerror = () => say("Couldn’t create the PNG. Try the SVG download instead.");
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(new XMLSerializer().serializeToString(svg));
+  });
+
+  $("copy").addEventListener("click", async () => {
+    if (!nameInput.value.trim()) { nameInput.focus(); say("Enter a name first, then copy the link."); return; }
+    try { await navigator.clipboard.writeText(location.href); say("Link copied. Anyone who opens it sees this clock."); }
+    catch (err) { say("Couldn’t copy automatically. Copy the address from your browser’s address bar."); }
+  });
+
+  // Gallery and word list
+  $("gallery-grid").innerHTML = EXAMPLES.map(([name, idea], i) =>
+    `<figure><button type="button" class="card" data-i="${i}" aria-label="Load ${escapeXml(name)}’s clock"><span class="dial">${buildSvg(parseRequest(name, idea), DEFAULT_TIME, false, "g" + i)}</span><span class="cap"><strong>${escapeXml(name)}</strong><span>${escapeXml(idea)}</span></span></button></figure>`
+  ).join("");
+  $("gallery-grid").addEventListener("click", (e) => {
+    const card = e.target.closest("[data-i]");
+    if (!card) return;
+    const [name, idea] = EXAMPLES[card.dataset.i];
+    nameInput.value = name;
+    ideaInput.value = idea;
+    variant = 0;
+    render();
+    scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+  });
+
+  const wordRows = Object.values(THEMES).map((t) => [t.label, t.keywords.join(", ")]);
+  wordRows.push(["Shape", "round, square, hexagon"], ["Face markings", "roman, dots, ticks, numbers, “no numbers”"], ["Mood", "light, white, ivory, pearl, cream"]);
+  $("words-list").innerHTML = wordRows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+
+  // The phone in the moral section shows the real time.
+  const phoneTime = $("phone-time"), phoneDate = $("phone-date");
+  function phoneTick() {
+    const d = new Date();
+    phoneTime.textContent = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+    phoneDate.textContent = d.toLocaleDateString([], { weekday: "long", day: "numeric", month: "long" });
+  }
+  phoneTick();
+  setInterval(phoneTick, 1000);
+
+  // Start from a shared link if there is one.
+  const q = new URLSearchParams(location.search);
+  nameInput.value = cleanText(q.get("name"), MAX_NAME);
+  ideaInput.value = cleanText(q.get("idea"), MAX_IDEA);
+  variant = Math.max(0, Math.min(parseInt(q.get("v"), 10) || 0, 999));
+  render(false);
+})();
+</script>
+</body>
+</html>
